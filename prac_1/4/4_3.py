@@ -16,14 +16,20 @@ def draw(shader, width, height):
 
 def shader(x, y):
     cx, cy = 0.5, 0.5
-    r = 0.4
-    d = math.sqrt((x - cx)**2 + (y - cy)**2)
-    if d < r:
-        theta = math.atan2(y - cy, x - cx) * 180 / math.pi
-        if -30 < theta < 30:
-            return 0, 0, 0
-        return 1, 1, 0
-    return 0, 0, 0
+    radius = 0.4
+    dx, dy = x - cx, y - cy
+
+    if dx * dx + dy * dy > radius * radius:
+        return 0, 0, 0  # фон
+    eye_dx, eye_dy = x - 0.6, y - 0.25
+    if eye_dx * eye_dx + eye_dy * eye_dy < 0.07 * 0.07:
+        return 0, 0, 0  # глаз
+
+    angle_deg = math.degrees(math.atan2(dy, dx))
+    if -30 <= angle_deg <= 30:
+        return 0, 0, 0  # рот
+
+    return 1, 1, 0
 
 
 def main(shader):

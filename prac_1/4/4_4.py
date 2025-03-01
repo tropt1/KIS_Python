@@ -1,35 +1,37 @@
 import tkinter as tk
 
 
-def draw(shader, width, height):
+def noise(i: int, j: int) -> float:
+    n = i + j * 150
+    n = (n << 13) ^ n
+    res = 1.0 - ((n * (n * n * 60493 + 19990303) + 1376312589)
+                 & 0x7fffffff) / 1073741824.0
+    return 0.5 * (res + 1.0)
+
+
+def draw_noise(width: int, height: int) -> bytes:
     image = bytearray((0, 0, 0) * width * height)
-    for y in range(height):
-        for x in range(width):
-            pos = (width * y + x) * 3
-            color = shader(x / width, y / height)
-            normalized = [max(min(int(c * 255), 255), 0) for c in color]
-            image[pos:pos + 3] = normalized
-    header = bytes(f'P6\n{width} {height}\n255\n', 'ascii')
+    for j in range(height):
+        for i in range(width):
+            pos = (j * width + i) * 3
+            v = noise(i, j)
+            v = max(0.0, min(1.0, v))
+            col = int(v * 255)
+            image[pos:pos + 3] = (col, col, col)
+    header = bytes(f"P6\n{width} {height}\n255\n", "ascii")
     return header + image
 
 
-def noise(x, y):
-    n = x * 15485863 + y * 32416190071
-    n = (n * n * n) % 1000000007
-    return (n % 10000) / 10000.0
-
-
-def shader(x, y):
-    n = noise(x, y)
-    return n, n, n
-
-
-def main(shader):
-    label = tk.Label()
-    img = tk.PhotoImage(data=draw(shader, 256, 256)).zoom(2, 2)
+def main():
+    root = tk.Tk()
+    root.title("Визуализация функции noise")
+    width, height = 256, 256
+    data = draw_noise(width, height)
+    img = tk.PhotoImage(data=data).zoom(2, 2)
+    label = tk.Label(root, image=img)
     label.pack()
-    label.config(image=img)
-    tk.mainloop()
+    root.mainloop()
 
 
-main(shader)
+if __name__ == "__main__":
+    main()

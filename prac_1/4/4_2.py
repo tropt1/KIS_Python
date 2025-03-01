@@ -16,13 +16,31 @@ def draw(shader, width, height):
 
 def shader(x, y):
     cx, cy = 0.5, 0.5
-    r = 0.4
-    d = math.sqrt((x - cx)**2 + (y - cy)**2)
-    if d < r:
-        z = math.sqrt(r**2 - d**2)
-        intensity = z / r
-        return intensity, intensity, intensity
-    return 0, 0, 0
+    radius = 0.5
+
+    dx, dy = x - cx, y - cy
+    dist = math.sqrt(dx * dx + dy * dy)
+
+    if dist > radius:
+        return (0, 0, 0)
+
+    ratio = (x - cx) / radius  # = (x-0.5)/0.5
+
+    if ratio < 0:
+        t = ratio + 1
+        r_col = 0 + (1 - 0) * t
+        g_col = 1 + (1 - 1) * t
+        b_col = 0
+    else:
+        t = ratio
+        r_col = 1 + (1 - 1) * t
+        g_col = 1 + (0 - 1) * t
+        b_col = 0
+
+    brightness = 1 - dist / radius
+    brightness = max(0, min(1, brightness))
+
+    return (r_col * brightness, g_col * brightness, b_col * brightness)
 
 
 def main(shader):
